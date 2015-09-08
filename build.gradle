@@ -1,0 +1,32 @@
+description = "A utility for trusting untrusted certificates"
+
+buildscript {
+  repositories {
+    maven { url "https://repo.spring.io/plugins-release" }
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
+    classpath("io.spring.gradle:dependency-management-plugin:0.5.3.RELEASE")
+    classpath("io.spring.gradle:spring-io-plugin:0.0.4.RELEASE")
+  }
+}
+
+apply plugin: 'java'
+
+archivesBaseName = "cloudfoundry-certificate-truster"
+group = "io.pivotal.spring.cloud"
+version = "1.0.0.BUILD-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+	compile("org.springframework:spring-context:4.1.6.RELEASE")
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.2.1'
+}

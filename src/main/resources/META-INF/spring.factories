@@ -1,0 +1,2 @@
+org.springframework.context.ApplicationContextInitializer=\
+io.pivotal.springcloud.ssl.CloudFoundryCertificateTruster
