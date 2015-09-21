@@ -33,7 +33,7 @@ public class CloudFoundryCertificateTruster implements ApplicationContextInitial
 				if ("https".equals(cfTargetUrl.getProtocol()) && host != null) {
 					int httpsPort = cfTargetUrl.getPort() > 0 ? cfTargetUrl.getPort() : 443;
 					try {
-						SSLCertificateTruster.trustCertificate(host, httpsPort, 5000);
+						SslCertificateTruster.trustCertificate(host, httpsPort, 5000);
 					} catch (Exception e) {
 						System.err.println("trusting certificate at " + host + ":" + httpsPort + " failed due to " + e);
 						e.printStackTrace();
@@ -56,7 +56,7 @@ public class CloudFoundryCertificateTruster implements ApplicationContextInitial
 				}
 				if (host != null && host.length() > 0 && port > 0 && port < 65536) {
 					try {
-						SSLCertificateTruster.trustCertificate(host, port, 5000);
+						SslCertificateTruster.trustCertificate(host, port, 5000);
 					} catch (Exception e) {
 						System.err.println("trusting certificate at " + host + ":" + port + " failed due to " + e);
 						e.printStackTrace();

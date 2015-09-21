@@ -26,7 +26,7 @@ import javax.net.ssl.X509TrustManager;
  * @author wtran@pivotal.io
  *
  */
-public class SSLCertificateTruster {
+public class SslCertificateTruster {
 
 	/**
 	 * Performs an SSL handshake with the given host and port, and if the JVM
