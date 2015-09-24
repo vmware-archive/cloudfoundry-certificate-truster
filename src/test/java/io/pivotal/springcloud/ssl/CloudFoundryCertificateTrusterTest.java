@@ -1,7 +1,8 @@
 package io.pivotal.springcloud.ssl;
 
+import io.pivotal.springcloud.ssl.CloudFoundryCertificateTruster.EnvironmentVariableResolver;
+
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,8 +17,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.util.ReflectionUtils;
-
-import io.pivotal.springcloud.ssl.CloudFoundryCertificateTruster.EnvironmentVariableResolver;
 
 @RunWith(Parameterized.class)
 public class CloudFoundryCertificateTrusterTest {
@@ -53,13 +52,10 @@ public class CloudFoundryCertificateTrusterTest {
 		Field envField = ReflectionUtils.findField(CloudFoundryCertificateTruster.class, "env");
 		ReflectionUtils.makeAccessible(envField);
 		ReflectionUtils.setField(envField, cfCertTruster, env);
-		Field sslCertTrusterInstanceField = ReflectionUtils.findField(SslCertificateTruster.class, "instance");
-		ReflectionUtils.makeAccessible(sslCertTrusterInstanceField);
-		Field modifiersField = ReflectionUtils.findField(Field.class, "modifiers");
-		modifiersField.setAccessible(true);
-		modifiersField
-				.setInt(sslCertTrusterInstanceField, sslCertTrusterInstanceField.getModifiers() & ~Modifier.FINAL);
-		ReflectionUtils.setField(sslCertTrusterInstanceField, SslCertificateTruster.class, sslCertTruster);
+		Field sslCertTrusterField = ReflectionUtils.findField(CloudFoundryCertificateTruster.class,
+				"sslCertificateTruster");
+		ReflectionUtils.makeAccessible(sslCertTrusterField);
+		ReflectionUtils.setField(sslCertTrusterField, cfCertTruster, sslCertTruster);
 	}
 
 	@Parameters

@@ -32,6 +32,8 @@ import javax.net.ssl.X509TrustManager;
  *
  */
 public class SslCertificateTruster {
+	public static final String JAVAX_NET_SSL_TRUST_STORE_PASSWORD = "javax.net.ssl.trustStorePassword";
+	public static final String JAVAX_NET_SSL_TRUST_STORE = "javax.net.ssl.trustStore";
 	private final ExecutorService executor;
 
 	private SslCertificateTruster() {
@@ -44,7 +46,7 @@ public class SslCertificateTruster {
 		});
 	}
 
-	private static final SslCertificateTruster instance = new SslCertificateTruster();
+	static final SslCertificateTruster instance = new SslCertificateTruster();
 
 	/**
 	 * Performs an SSL handshake with the given host and port, and if the JVM
@@ -158,8 +160,8 @@ public class SslCertificateTruster {
 		File trustStoreOutputFile = File.createTempFile("truststore", null);
 		trustStoreOutputFile.deleteOnExit();
 		trustStore.store(new FileOutputStream(trustStoreOutputFile), password.toCharArray());
-		System.setProperty("javax.net.ssl.trustStore", trustStoreOutputFile.getAbsolutePath());
-		System.setProperty("javax.net.ssl.trustStorePassword", password);
+		System.setProperty(JAVAX_NET_SSL_TRUST_STORE, trustStoreOutputFile.getAbsolutePath());
+		System.setProperty(JAVAX_NET_SSL_TRUST_STORE_PASSWORD, password);
 	}
 
 	private static X509TrustManager getDefaultTrustManager() throws NoSuchAlgorithmException, KeyStoreException {

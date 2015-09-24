@@ -9,9 +9,6 @@ import javax.net.ssl.X509TrustManager;
 import org.junit.Assert;
 import org.junit.Test;
 
-import sun.security.tools.keytool.CertAndKeyGen;
-import sun.security.x509.X500Name;
-
 public class SslCertificateTrusterTest {
 
 	@Test
@@ -33,10 +30,11 @@ public class SslCertificateTrusterTest {
 
 	@Test
 	public void appendToTruststore() throws Exception {
-		// generate self-signed cert
-		CertAndKeyGen keyGen = new CertAndKeyGen("RSA", "SHA1WithRSA", null);
-		keyGen.generate(1024);
-		X509Certificate selfsigned = keyGen.getSelfCertificate(new X500Name("CN=foo.nonexistant"), (long) 365 * 24 * 3600);
+		// get self-signed cert
+		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+		String password = "changeit";
+		keystore.load(SslCertificateTrusterTest.class.getResourceAsStream("/selfsigned.jks"), password.toCharArray());
+		X509Certificate selfsigned = (X509Certificate) keystore.getCertificate("mykey");
 
 		SslCertificateTruster.appendToTruststore(new X509Certificate[] { selfsigned });
 
@@ -52,10 +50,11 @@ public class SslCertificateTrusterTest {
 		X509TrustManager defaultTrustManager = (X509TrustManager) trustManagerFactory.getTrustManagers()[0];
 		X509Certificate[] cacerts = defaultTrustManager.getAcceptedIssuers();
 		for (X509Certificate certificate : cacerts) {
-			if (certificate.equals(selfsigned)) {
+			if (certificate.getSubjectDN().equals(selfsigned.getSubjectDN())) {
 				return;
 			}
 		}
 		Assert.fail();
 	}
+
 }

@@ -18,6 +18,7 @@ public class CloudFoundryCertificateTruster implements ApplicationContextInitial
 
 	private static final CloudFoundryCertificateTruster instance = new CloudFoundryCertificateTruster();
 	private EnvironmentVariableResolver env = new EnvironmentVariableResolver();
+	private SslCertificateTruster sslCertificateTruster = SslCertificateTruster.instance;
 	/**
 	 * If the CF_TARGET env var starts with https://, gets the certificate for
 	 * that host and trust it if untrusted. If no CF_TARGET env var is present,
@@ -40,7 +41,7 @@ public class CloudFoundryCertificateTruster implements ApplicationContextInitial
 				if ("https".equals(cfTargetUrl.getProtocol()) && host != null) {
 					int httpsPort = cfTargetUrl.getPort() > 0 ? cfTargetUrl.getPort() : 443;
 					try {
-						SslCertificateTruster.trustCertificate(host, httpsPort, 5000);
+						sslCertificateTruster.trustCertificateInternal(host, httpsPort, 5000);
 					} catch (Exception e) {
 						System.err.println("trusting certificate at " + host + ":" + httpsPort + " failed due to " + e);
 						e.printStackTrace();
@@ -62,7 +63,7 @@ public class CloudFoundryCertificateTruster implements ApplicationContextInitial
 				}
 				if (host != null && host.length() > 0 && port > 0 && port < 65536) {
 					try {
-						SslCertificateTruster.trustCertificate(host, port, 5000);
+						sslCertificateTruster.trustCertificateInternal(host, port, 5000);
 					} catch (Exception e) {
 						System.err.println("trusting certificate at " + host + ":" + port + " failed due to " + e);
 						e.printStackTrace();
