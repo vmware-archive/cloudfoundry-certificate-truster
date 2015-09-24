@@ -16,6 +16,8 @@ import org.springframework.context.ConfigurableApplicationContext;
  */
 public class CloudFoundryCertificateTruster implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
+	private static final CloudFoundryCertificateTruster instance = new CloudFoundryCertificateTruster();
+	private EnvironmentVariableResolver env = new EnvironmentVariableResolver();
 	/**
 	 * If the CF_TARGET env var starts with https://, gets the certificate for
 	 * that host and trust it if untrusted. If no CF_TARGET env var is present,
@@ -24,8 +26,13 @@ public class CloudFoundryCertificateTruster implements ApplicationContextInitial
 	 * Also supports trusting certificates listed in the env var TRUST_CERTS, a
 	 * comma separated list of hostname:port.
 	 */
+
 	public static void trustCertificates() {
-		String cfTarget = System.getenv("CF_TARGET");
+		instance.trustCertificatesInternal();
+	}
+
+	void trustCertificatesInternal() {
+		String cfTarget = env.getValue("CF_TARGET");
 		if (cfTarget != null) {
 			try {
 				URL cfTargetUrl = new URL(cfTarget);
@@ -43,8 +50,7 @@ public class CloudFoundryCertificateTruster implements ApplicationContextInitial
 				System.err.println("Cannot parse CF_TARGET '"+cfTarget+"' as a URL");
 			}
 		}
-		
-		String trustCerts = System.getenv("TRUST_CERTS");
+		String trustCerts = env.getValue("TRUST_CERTS");
 		if (trustCerts != null) {
 			for (String hostAndPort : trustCerts.split(",")) {
 				String[] parts = hostAndPort.split(":");
@@ -72,6 +78,12 @@ public class CloudFoundryCertificateTruster implements ApplicationContextInitial
 
 	@Override
 	public void initialize(ConfigurableApplicationContext applicationContext) {
+	}
+	
+	static class EnvironmentVariableResolver {
+		String getValue(String key) {
+			return System.getenv(key);
+		}
 	}
 
 }

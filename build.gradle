@@ -25,6 +25,7 @@ apply plugin: "io.spring.dependency-management"
 
 archivesBaseName = "cloudfoundry-certificate-truster"
 group = "io.pivotal.spring.cloud"
+sourceCompatibility = 1.6
 
 repositories {
 	mavenCentral()

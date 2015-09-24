@@ -10,9 +10,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
@@ -27,6 +32,19 @@ import javax.net.ssl.X509TrustManager;
  *
  */
 public class SslCertificateTruster {
+	private final ExecutorService executor;
+
+	private SslCertificateTruster() {
+		executor = Executors.newFixedThreadPool(1, new ThreadFactory() {
+
+			@Override
+			public Thread newThread(Runnable r) {
+				return new Thread(r, "SSLCertificateTruster:downloader");
+			}
+		});
+	}
+
+	private static final SslCertificateTruster instance = new SslCertificateTruster();
 
 	/**
 	 * Performs an SSL handshake with the given host and port, and if the JVM
@@ -43,19 +61,34 @@ public class SslCertificateTruster {
 	 *             handshake
 	 */
 	public static X509Certificate[] getUntrustedCertificate(String host, int port, int timeout) throws Exception {
+		return instance.getUntrustedCertificateInternal(host, port, timeout);
+	}
+
+	X509Certificate[] getUntrustedCertificateInternal(final String host, final int port, int timeout) throws Exception {
 		SSLContext context = SSLContext.getInstance("TLS");
 		X509TrustManager defaultTrustManager = getDefaultTrustManager();
 		CertificateCollectingTrustManager collector = new CertificateCollectingTrustManager(defaultTrustManager);
 		context.init(null, new TrustManager[] { collector }, null);
-		SSLSocketFactory factory = context.getSocketFactory();
+		final SSLSocketFactory factory = context.getSocketFactory();
 
-		SSLSocket socket = (SSLSocket) factory.createSocket(host, port);
-		socket.setSoTimeout(timeout);
+		Future<?> task = executor.submit(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					SSLSocket socket = (SSLSocket) factory.createSocket(host, port);
+					socket.startHandshake();
+					socket.close();
+				} catch (Exception e) {
+					System.err.println("Error downloading certificate " + host + ":" + port + "," + e);
+				}
+			}
+		});
 
 		try {
-			socket.startHandshake();
-			socket.close();
-		} catch (SSLException e) {
+			task.get(timeout, TimeUnit.MILLISECONDS);
+		} catch (TimeoutException e) {
+			task.cancel(true);
+			throw e;
 		}
 
 		X509Certificate[] chain = collector.getCollectedCertificateChain();
@@ -79,6 +112,10 @@ public class SslCertificateTruster {
 	 * @throws Exception
 	 */
 	public static void trustCertificate(String host, int port, int timeout) throws Exception {
+		instance.trustCertificateInternal(host, port, timeout);
+	}
+
+	void trustCertificateInternal(String host, int port, int timeout) throws Exception {
 		X509Certificate[] untrusted = getUntrustedCertificate(host, port, timeout);
 		if (untrusted != null) {
 			appendToTruststore(untrusted);
@@ -98,6 +135,11 @@ public class SslCertificateTruster {
 	 * @throws FileNotFoundException
 	 */
 	public static void appendToTruststore(X509Certificate[] chain) throws NoSuchAlgorithmException, KeyStoreException,
+			IOException, CertificateException, FileNotFoundException {
+		instance.appendToTruststoreInternal(chain);
+	}
+
+	void appendToTruststoreInternal(X509Certificate[] chain) throws NoSuchAlgorithmException, KeyStoreException,
 			IOException, CertificateException, FileNotFoundException {
 		X509TrustManager defaultTrustManager = getDefaultTrustManager();
 		X509Certificate[] cacerts = defaultTrustManager.getAcceptedIssuers();
