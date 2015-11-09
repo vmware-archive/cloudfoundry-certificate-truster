@@ -10,7 +10,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  *
  * Trusts certificates specified by environment variable CF_TARGET.
  * Trust is established during application context initialization.
- * 
+ *
  * @author wtran@pivotal.io
  *
  */
@@ -57,7 +57,7 @@ public class CloudFoundryCertificateTruster implements ApplicationContextInitial
 	@Override
 	public void initialize(ConfigurableApplicationContext applicationContext) {
 	}
-	
+
 	static class EnvironmentVariableResolver {
 		String getValue(String key) {
 			return System.getenv(key);
