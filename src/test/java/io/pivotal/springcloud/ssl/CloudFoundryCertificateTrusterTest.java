@@ -30,19 +30,16 @@ public class CloudFoundryCertificateTrusterTest {
 
 	private String cfTarget;
 
-	private String trustCerts;
+	private String expectedHost;
 
-	private List<String> expectedHosts;
+	private Integer expectedPort;
 
-	private List<Integer> expectedPorts;
-
-	public CloudFoundryCertificateTrusterTest(String cfTarget, String trustCerts, List<String> expectedHosts,
-			List<Integer> expectedPorts) {
+	public CloudFoundryCertificateTrusterTest(String cfTarget, String expectedHost,
+											  Integer expectedPort) {
 		super();
 		this.cfTarget = cfTarget;
-		this.trustCerts = trustCerts;
-		this.expectedHosts = expectedHosts;
-		this.expectedPorts = expectedPorts;
+		this.expectedHost = expectedHost;
+		this.expectedPort = expectedPort;
 	}
 
 	@Before
@@ -61,37 +58,14 @@ public class CloudFoundryCertificateTrusterTest {
 	@Parameters
 	public static List<Object[]> parameters() {
 		return Arrays.asList(new Object[][] {
-				{ null, null, null, null },
-				{ "http://api.foo.com", null, null, null },
-				{ "http://api.foo.com:8080", null, null, null },
-				{ "http://api.foo.com:8080/v2", null, null, null },
-				{ "https://api.foo.com", null,
-						Arrays.asList("api.foo.com"),
-						Arrays.asList(443) },
-				{ "https://api.foo.com/v2", null,
-						Arrays.asList("api.foo.com"),
-						Arrays.asList(443) },
-				{ "https://api.foo.com:8443", null,
-						Arrays.asList("api.foo.com"),
-						Arrays.asList(8443) },
-				{ "https://api.foo.com:8443/v2", null,
-						Arrays.asList("api.foo.com"),
-						Arrays.asList(8443) },
-				{ null, "api.foo.com",
-						Arrays.asList("api.foo.com"),
-						Arrays.asList(443) },
-				{ null, "api.foo.com:8443",
-						Arrays.asList("api.foo.com"),
-						Arrays.asList(8443) },
-				{ null, "api.foo.com,api.bar.com",
-						Arrays.asList("api.foo.com", "api.bar.com"),
-						Arrays.asList(443, 443) },
-				{ null, "api.foo.com:8443,api.bar.com:9443",
-						Arrays.asList("api.foo.com", "api.bar.com"),
-						Arrays.asList(8443, 9443) },
-				{ "https://api.baz.com:7443/v2", "api.foo.com:8443,api.bar.com:9443",
-						Arrays.asList("api.baz.com", "api.foo.com", "api.bar.com"),
-						Arrays.asList(7443, 8443, 9443) },
+				{ null, null, null },
+				{ "http://api.foo.com", null, null },
+				{ "http://api.foo.com:8080", null, null },
+				{ "http://api.foo.com:8080/v2", null, null },
+				{ "https://api.foo.com", "api.foo.com", 443},
+				{ "https://api.foo.com/v2", "api.foo.com", 443 },
+				{ "https://api.foo.com:8443", "api.foo.com", 8443},
+				{ "https://api.foo.com:8443/v2", "api.foo.com", 8443},
 		});
 	}
 
@@ -99,21 +73,22 @@ public class CloudFoundryCertificateTrusterTest {
 	public void testCfCertTruster()
 			throws Exception {
 		Mockito.when(env.getValue("CF_TARGET")).thenReturn(cfTarget);
-		Mockito.when(env.getValue("TRUST_CERTS")).thenReturn(trustCerts);
 
 		cfCertTruster.trustCertificatesInternal();
 
-		if (expectedHosts == null) {
+		if (expectedHost == null) {
 			Mockito.verifyZeroInteractions(sslCertTruster);
 		} else {
 			ArgumentCaptor<String> hostCaptor = ArgumentCaptor.forClass(String.class);
 			ArgumentCaptor<Integer> portCaptor = ArgumentCaptor.forClass(int.class);
-			Mockito.verify(sslCertTruster, Mockito.times(expectedHosts.size())).trustCertificateInternal(
+			ArgumentCaptor<Integer> timeoutCaptor = ArgumentCaptor.forClass(int.class);
+			Mockito.verify(sslCertTruster, Mockito.times(1)).trustCertificateInternal(
 					hostCaptor.capture(),
 					portCaptor.capture(),
-					Mockito.anyInt());
-			Assert.assertEquals(expectedHosts, hostCaptor.getAllValues());
-			Assert.assertEquals(expectedPorts, portCaptor.getAllValues());
+					timeoutCaptor.capture());
+			Assert.assertEquals(expectedHost, hostCaptor.getValue());
+			Assert.assertEquals(expectedPort, portCaptor.getValue());
+			Assert.assertEquals(new Integer(5000), timeoutCaptor.getValue());
 		}
 
 	}
