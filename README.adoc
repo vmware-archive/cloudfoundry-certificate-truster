@@ -1,0 +1,58 @@
+= Cloud Foundry Certificate Truster image:https://build.spring.io/plugins/servlet/buildStatusImage/CLOUD-CFCT["Build Status", link="https://build.spring.io/browse/CLOUD-CFCT"]
+
+`CloudFoundryCertificateTruster` will download certificates
+and add them to the JVM truststore at the earliest possible time.
+
+== Dependencies
+
+Include the dependency in your Spring Boot project to activate the certificate truster.
+
+=== Maven
+
+[source,xml]
+----
+<dependency>
+  <groupId>io.pivotal.spring.cloud</groupId>
+  <artifactId>cloudfoundry-certificate-truster</artifactId>
+  <version>1.0.1.RELEASE</version>
+</dependency>
+----
+
+=== Gradle
+
+[source,groovy]
+----
+compile("io.pivotal.spring.cloud:cloudfoundry-certificate-truster:1.0.1.RELEASE")
+----
+
+== Usage
+
+Certificates can be specified by the following environment variable:
+
+----
+CF_TARGET=https://api.my-cf-domain.com
+----
+
+This will cause `CloudFoundryCertificateTruster` to download the certificate at api.my-cf-domain.com:443 and add
+it to the JVM's truststore.
+
+NOTE: The timeout for certificate download is 5 seconds. If any errors occur, they are printed to System.err.
+
+== Build
+
+Build and test with Gradle:
+
+----
+./gradlew build
+----
+
+Install to your local Maven repository:
+
+----
+./gradlew install
+----
+
+== License
+
+Cloud Foundry Certificate Truster is Open Source software released under the
+http://www.apache.org/licenses/LICENSE-2.0.html[Apache 2.0 license].
