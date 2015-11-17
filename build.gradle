@@ -155,3 +155,22 @@ artifacts {
 task wrapper(type: Wrapper) {
 	gradleVersion = "2.7"
 }
+
+task updateRootDocs << {
+	copy {
+		from "src/dist"
+		into "${rootProject.projectDir}"
+		include "notice.txt"
+		expand(copyright: new Date().format("yyyy"), version: project.version)
+		rename { filename -> "NOTICE" }
+	}
+
+	copy {
+		from "src/dist"
+		into "${rootProject.projectDir}"
+		include "license.txt"
+		rename { filename -> "LICENSE" }
+	}
+}
+
+build.dependsOn("updateRootDocs")
