@@ -36,6 +36,8 @@ CF_TARGET=https://api.my-cf-domain.com
 This will cause `CloudFoundryCertificateTruster` to download the certificate at api.my-cf-domain.com:443 and add
 it to the JVM's truststore.
 
+Multiple URLs can be specified using comma (,) as a delimiter.
+
 NOTE: The timeout for certificate download is 5 seconds. If any errors occur, they are printed to System.err.
 
 == Build
