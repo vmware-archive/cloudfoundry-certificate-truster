@@ -48,24 +48,31 @@ public class CloudFoundryCertificateTruster implements ApplicationContextInitial
 	void trustCertificatesInternal() {
 		String cfTarget = env.getValue("CF_TARGET");
 		if (cfTarget != null) {
-			try {
-				URL cfTargetUrl = new URL(cfTarget);
-				String host = cfTargetUrl.getHost();
-				if ("https".equals(cfTargetUrl.getProtocol()) && host != null) {
-					int httpsPort = cfTargetUrl.getPort() > 0 ? cfTargetUrl.getPort() : 443;
-					try {
-						sslCertificateTruster.trustCertificateInternal(host, httpsPort, 5000);
-					} catch (Exception e) {
-						System.err.println("trusting certificate at " + host + ":" + httpsPort + " failed due to " + e);
-						e.printStackTrace();
-					}
-				}
-			} catch (MalformedURLException e1) {
-				System.err.println("Cannot parse CF_TARGET '"+cfTarget+"' as a URL");
+			String[] cfTargets = cfTarget.split(",");
+			for (String target : cfTargets) {
+				trustCertificateInternal(target);
 			}
 		}
 	}
 
+	void trustCertificateInternal(String target) {
+		try {
+			URL cfTargetUrl = new URL(target);
+			String host = cfTargetUrl.getHost();
+			if ("https".equals(cfTargetUrl.getProtocol()) && host != null) {
+				int httpsPort = cfTargetUrl.getPort() > 0 ? cfTargetUrl.getPort() : 443;
+				try {
+					sslCertificateTruster.trustCertificateInternal(host, httpsPort, 5000);
+				} catch (Exception e) {
+					System.err.println("trusting certificate at " + host + ":" + httpsPort + " failed due to " + e);
+					e.printStackTrace();
+				}
+			}
+		} catch (MalformedURLException e1) {
+			System.err.println("Cannot parse CF_TARGET '"+target+"' as a URL");
+		}
+	}
+	
 	static {
 		trustCertificates();
 	}
