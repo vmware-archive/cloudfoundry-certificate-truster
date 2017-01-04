@@ -15,3 +15,13 @@ This will cause the CloudFoundryCertificateTruster to download the certificates 
 
 The timeout for certificate download is 5 seconds. If any errors occur, they are printed to System.err.
 
+## Maven Dependency
+
+```xml
+<!-- Pivotal cloudfoundry-certificate-truster -->
+<dependency>
+    <groupId>io.pivotal.spring.cloud</groupId>
+    <artifactId>cloudfoundry-certificate-truster</artifactId>
+    <version>1.0.1.RELEASE</version>
+</dependency>
+```
