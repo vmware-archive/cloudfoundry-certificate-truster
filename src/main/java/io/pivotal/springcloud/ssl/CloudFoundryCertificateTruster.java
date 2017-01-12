@@ -62,6 +62,7 @@ public class CloudFoundryCertificateTruster implements ApplicationContextInitial
 					int httpsPort = cfTargetUrl.getPort() > 0 ? cfTargetUrl.getPort() : 443;
 					try {
 						sslCertificateTruster.trustCertificateInternal(host, httpsPort, 5000);
+						log.info("trusting certificate at {}:{} succeeded", host, httpsPort);
 					} catch (Exception e) {
 						log.error("trusting certificate at {}:{} failed", host, httpsPort, e);
 					}
