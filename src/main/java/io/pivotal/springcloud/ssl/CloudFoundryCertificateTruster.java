@@ -19,6 +19,8 @@ package io.pivotal.springcloud.ssl;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -32,6 +34,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  */
 public class CloudFoundryCertificateTruster implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
+	private static final Logger log = LoggerFactory.getLogger(CloudFoundryCertificateTruster.class);
 	private static final CloudFoundryCertificateTruster instance = new CloudFoundryCertificateTruster();
 	private EnvironmentVariableResolver env = new EnvironmentVariableResolver();
 	private SslCertificateTruster sslCertificateTruster = SslCertificateTruster.instance;
@@ -59,13 +62,13 @@ public class CloudFoundryCertificateTruster implements ApplicationContextInitial
 					int httpsPort = cfTargetUrl.getPort() > 0 ? cfTargetUrl.getPort() : 443;
 					try {
 						sslCertificateTruster.trustCertificateInternal(host, httpsPort, 5000);
+						log.info("trusting certificate at {}:{} succeeded", host, httpsPort);
 					} catch (Exception e) {
-						System.err.println("trusting certificate at " + host + ":" + httpsPort + " failed due to " + e);
-						e.printStackTrace();
+						log.error("trusting certificate at {}:{} failed", host, httpsPort, e);
 					}
 				}
 			} catch (MalformedURLException e1) {
-				System.err.println("Cannot parse CF_TARGET '" + cfTarget + "' as a URL");
+				log.error("Cannot parse CF_TARGET '{}' as a URL", cfTarget);
 			}
 		}
 		String trustCerts = env.getValue("TRUST_CERTS");
@@ -82,8 +85,7 @@ public class CloudFoundryCertificateTruster implements ApplicationContextInitial
 					try {
 						sslCertificateTruster.trustCertificateInternal(host, port, 5000);
 					} catch (Exception e) {
-						System.err.println("trusting certificate at " + host + ":" + port + " failed due to " + e);
-						e.printStackTrace();
+						log.error("trusting certificate at {}:{} failed", host, port, e);
 					}
 				}
 			}
