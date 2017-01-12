@@ -27,7 +27,7 @@ compile("io.pivotal.spring.cloud:cloudfoundry-certificate-truster:1.0.1.RELEASE"
 
 == Usage
 
-Certificates can be specified by the following environment variable:
+Certificates can be specified by either or both of the following environment variables:
 
 ----
 CF_TARGET=https://api.my-cf-domain.com
@@ -35,6 +35,12 @@ CF_TARGET=https://api.my-cf-domain.com
 
 This will cause `CloudFoundryCertificateTruster` to download the certificate at api.my-cf-domain.com:443 and add
 it to the JVM's truststore.
+
+----
+TRUST_CERTS=api.foo.com,api.bar.com:8443
+----
+
+This will cause `CloudFoundryCertificateTruster` to download the certificates at api.foo.com:443 and api.bar.com:8443 and add them to the JVM's truststore. You can specify one or more comma separated hostnames, optionally with a port.
 
 NOTE: The timeout for certificate download is 5 seconds. If any errors occur, they are printed to System.err.
 
