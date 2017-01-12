@@ -40,6 +40,9 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  *
  * Utility for getting the JVM to trust an untrusted certificate
@@ -48,6 +51,8 @@ import javax.net.ssl.X509TrustManager;
  *
  */
 public class SslCertificateTruster {
+	
+	private static final Logger log = LoggerFactory.getLogger(SslCertificateTruster.class);
 	public static final String JAVAX_NET_SSL_TRUST_STORE_PASSWORD = "javax.net.ssl.trustStorePassword";
 	public static final String JAVAX_NET_SSL_TRUST_STORE = "javax.net.ssl.trustStore";
 	private final ExecutorService executor;
@@ -97,7 +102,7 @@ public class SslCertificateTruster {
 					socket.startHandshake();
 					socket.close();
 				} catch (Exception e) {
-					System.err.println("Error downloading certificate " + host + ":" + port + "," + e);
+					log.error("Error downloading certificate {}:{}", host, port, e);
 				}
 			}
 		});
