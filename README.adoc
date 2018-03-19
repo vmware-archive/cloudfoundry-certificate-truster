@@ -1,4 +1,5 @@
 = Cloud Foundry Certificate Truster image:https://build.spring.io/plugins/servlet/buildStatusImage/CLOUD-CFCT["Build Status", link="https://build.spring.io/browse/CLOUD-CFCT"]
+= Cloud Foundry Certificate Truster image:https://build.spring.io/plugins/servlet/wittified/build-status/CLOUD-CFCT["Build Status", link="https://build.spring.io/browse/CLOUD-CFCT"]
 
 `CloudFoundryCertificateTruster` will download certificates
 and add them to the JVM truststore at the earliest possible time.
