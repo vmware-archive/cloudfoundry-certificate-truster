@@ -62,7 +62,8 @@ public class SslCertificateTruster {
 
 			@Override
 			public Thread newThread(Runnable r) {
-				return new Thread(r, "SSLCertificateTruster:downloader");
+				Thread t = new Thread(r, "SSLCertificateTruster:downloader");
+				t.setDaemon(true);
 			}
 		});
 	}
